@@ -1,0 +1,7 @@
+name = "DistributedEnv"
+uuid = "4c74d760-a68f-11e8-0c49-2ba71e3afc10"
+authors = ["Jun Tian <juti@microsoft.com>"]
+version = "0.1.0"
+
+[deps]
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
