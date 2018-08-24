@@ -1,13 +1,15 @@
 module DistributedEnv
-using Distributed
+export init_env
+
+include("Env/Env.jl")
 
 include("abstractenv.jl")
-include("actors/actors.jl")
-include("distributedenv.jl")
+include("denv.jl")
 
-function init_env(id::String, n::Int, workers=workers())
-    @everywhere workers include(joinpath(@__DIR__, "actors", string(id2actor(name)) * ".jl")
-    [[DistributedEnv(id, wid) for _ in 1:n] for wid in workers]
+@everywhere include(joinpath(@__DIR__, "Env", "Env.jl"))
+
+function init_env(id::String, n::Int=1, workers::Vector{Int}=workers())
+    [DEnv(id, wid) for wid in workers for _ in 1:n]
 end
 
 end # module
