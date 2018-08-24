@@ -10,3 +10,5 @@ function gymactor(name::String)
         end
     end
 end
+
+gymids() = [x[:id] for x in gym.envs[:registry][:all]()]
