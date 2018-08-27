@@ -1,8 +1,8 @@
 module DistributedEnv
-export init_env
+export init_env, send
 
 include("Env/Env.jl")
-include("abstractenv.jl")
+include("abstractdistributedenv.jl")
 include("denv.jl")
 
 function init_env(id::String, n::Int=1, workers::Vector{Int}=workers())

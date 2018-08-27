@@ -1,12 +1,22 @@
+using MLStyle
 using PyCall
 @pyimport gym
 
-function pygymenv(id::String)
-    env = gym.make(id)
-    (method, args) -> begin
-        if method == :reset 
-            env[:reset]()
-        end
+struct GymEnv <: AbstractEnv
+    pyenv::PyObject
+    state::PyObject
+end
+
+function GymEnv(id::String)
+    GymEnv(gym.make(id), PyNULL())
+end
+
+function receive(env::GymEnv, method::String, args::Tuple, kw::Iterators.Pairs)
+    @match method begin
+        "reset" => (pycall!(env.state, env.pyenv[:reset], PyArray); env.state)
+        "step"  => (pycall!(env.state, env.pyenv[:step], PyVector, args...);
+                    (env.state[1], env.state[2], env.state[3]))
+        _       => nothing
     end
 end
 
