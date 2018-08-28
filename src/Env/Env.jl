@@ -2,6 +2,7 @@ __precompile__(false)
 module Env
 export id2env, receive
 
+include("Space/Space.jl")
 include("abstractenv.jl")
 include("pygymenv.jl")
 include("ale.jl")

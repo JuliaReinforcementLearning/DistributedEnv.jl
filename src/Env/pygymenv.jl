@@ -1,14 +1,23 @@
 using MLStyle
 using PyCall
+using .Space
 @pyimport gym
+
+const pygym_ids = [x[:id] for x in gym.envs[:registry][:all]()]
 
 struct GymEnv <: AbstractEnv
     pyenv::PyObject
     state::PyObject
+    observespace::AbstractSpace
+    actspace::AbstractSpace
 end
 
 function GymEnv(id::String)
-    GymEnv(gym.make(id), PyNULL())
+    pyenv = gym.make(id)
+    GymEnv(pyenv,
+           PyNULL(),
+           gymspace2jlspace(pyenv[:observation_space]),
+           gymspace2jlspace(pyenv[:action_space]))
 end
 
 function receive(env::GymEnv, method::String, args::Tuple, kw::Iterators.Pairs)
@@ -20,4 +29,13 @@ function receive(env::GymEnv, method::String, args::Tuple, kw::Iterators.Pairs)
     end
 end
 
-const pygym_ids = [x[:id] for x in gym.envs[:registry][:all]()]
+function gymspace2jlspace(s::PyObject)
+    @match s[:__class__][:__name__] begin
+        "Box"           => BoxSpace(s[:low], s[:high])
+        "Discrete"      => DiscreteSpace(s[:n])
+        "MultiBinary"   => MultiBinarySpace(s[:n])
+        "MultiDiscrete" => MultiDiscreteSpace(s[:nvec])
+        "Tuple"         => map(gymspace2jlspace, s[:spaces])
+        "Dict"          => Dict(map((k, v) -> (k, gymspace2jlspace(v)), s[:spaces]))
+    end
+end
