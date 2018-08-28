@@ -22,7 +22,7 @@ function AtariEnv(id::String;
     setInt(ale, "frame_skip", Int32(frame_skip))
     setFloat(ale, "repeat_action_probability", Float32(repeat_action_probability))
     actions = actionset == :minimal ? getMinimalActionSet(ale) : getLegalActionSet(ale)
-    screen, get_screen = @match env.colorspace begin
+    screen, get_screen = @match colorspace begin
         "Grayscale" => (Array{Cuchar}(undef, 210*160), getScreenGrayscale)
         "RGB"       => (Array{Cuchar}(undef, 3*210*160), getScreenRGB)
         "Raw"       => (Array{Cuchar}(undef, 210*160), getScreen)
@@ -34,10 +34,10 @@ end
 function receive(env::AtariEnv, method::String, args::Tuple, kw::Iterators.Pairs)
     @match method begin
         "reset" => begin reset_game(env.ale)
-                         for _ in 1:rand(0:env.noopmax)
+                         for _ in 1:rand(0 : env.noopmax)
                             act(env.ale, Int32(0))
                          end
-                         env.setscreen(env.ale, env.screen)
+                         env.getscreen(env.ale, env.screen)
                          env.screen
                    end
         "step"  => begin reward = act(env.ale, env.actions[args...])

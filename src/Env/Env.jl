@@ -12,8 +12,7 @@ const supportedIDs = merge(Dict("pygym#" * x => GymEnv for x in pygym_ids),
 function id2env(id::String; kw...)
     haskey(supportedIDs, id) || throw("$id is not supported yet!")
     category, game_id = split(id, '#'; limit=2)
-    println(game_id)
-    supportedIDs[id](game_id;kw...)
+    supportedIDs[id](String(game_id);kw...)
 end
 
 end
