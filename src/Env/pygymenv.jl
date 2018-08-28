@@ -20,4 +20,4 @@ function receive(env::GymEnv, method::String, args::Tuple, kw::Iterators.Pairs)
     end
 end
 
-pygymids() = [x[:id] for x in gym.envs[:registry][:all]()]
+const pygym_ids = [x[:id] for x in gym.envs[:registry][:all]()]
