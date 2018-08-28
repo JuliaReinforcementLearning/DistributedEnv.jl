@@ -33,17 +33,18 @@ end
 
 function receive(env::AtariEnv, method::String, args::Tuple, kw::Iterators.Pairs)
     @match method begin
-        "reset" => begin reset_game(env.ale)
+        "reset"     => begin reset_game(env.ale)
                          for _ in 1:rand(0 : env.noopmax)
                             act(env.ale, Int32(0))
                          end
                          env.getscreen(env.ale, env.screen)
                          env.screen
-                   end
-        "step"  => begin reward = act(env.ale, env.actions[args...])
+                       end
+        "interact"  => begin reward = act(env.ale, env.actions[args...])
                          env.getscreen(env.ale, env.screen)
                          (env.screen, reward, game_over(env.ale))
-                   end
+                       end
+        "getstate"  => (env.getscreen(env.ale, env.screen); env.screen)
         _       => nothing
     end
 end
