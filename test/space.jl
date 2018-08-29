@@ -20,9 +20,9 @@ using PyCall
 end
 
 @testset "DiscreteSpace" begin
-    @test occursin(0, DiscreteSpace(10)) == true
-    @test occursin(5, DiscreteSpace(10)) == true
-    @test occursin(10, DiscreteSpace(10)) == false
+    @test occursin(0, DiscreteSpace(10, 0)) == true
+    @test occursin(5, DiscreteSpace(10, 0)) == true
+    @test occursin(10, DiscreteSpace(10, 0)) == false
 end
 
 @testset "MultiBinarySpace" begin
@@ -31,21 +31,21 @@ end
 end
 
 @testset "MultiDiscreteSpace" begin
-    @test occursin(0, MultiDiscreteSpace([2,3,2])) == true
-    @test occursin(1, MultiDiscreteSpace([2,3,2])) == true
-    @test occursin(2, MultiDiscreteSpace([2,3,2])) == false
-    @test occursin([1,1,1], MultiDiscreteSpace([2,3,2])) == true
-    @test occursin([0,0,0], MultiDiscreteSpace([2,3,2])) == true
-    @test occursin([3,3,3], MultiDiscreteSpace([2,3,2])) == false
+    @test occursin(0, MultiDiscreteSpace([2,3,2], 0)) == true
+    @test occursin(1, MultiDiscreteSpace([2,3,2], 0)) == true
+    @test occursin(2, MultiDiscreteSpace([2,3,2], 0)) == false
+    @test occursin([1,1,1], MultiDiscreteSpace([2,3,2], 0)) == true
+    @test occursin([0,0,0], MultiDiscreteSpace([2,3,2], 0)) == true
+    @test occursin([3,3,3], MultiDiscreteSpace([2,3,2], 0)) == false
 end
 
 @testset "Space Tuple" begin
     @test occursin(([0.5], 5, [true true; true true], [1, 1]),
-                   (BoxSpace(0,1), DiscreteSpace(5), MultiBinarySpace(2,2), MultiDiscreteSpace([2,2]))) == false
+                   (BoxSpace(0,1), DiscreteSpace(5, 0), MultiBinarySpace(2,2), MultiDiscreteSpace([2,2], 0))) == false
     @test occursin(([0.5], 0, [true true; true true], [1, 1]),
-                   (BoxSpace(0,1), DiscreteSpace(5), MultiBinarySpace(2,2), MultiDiscreteSpace([2,2]))) == true
+                   (BoxSpace(0,1), DiscreteSpace(5, 0), MultiBinarySpace(2,2), MultiDiscreteSpace([2,2], 0))) == true
     @test occursin((), 
-                   (BoxSpace(0,1), DiscreteSpace(5), MultiBinarySpace(2,2), MultiDiscreteSpace([2,2]))) == false
+                   (BoxSpace(0,1), DiscreteSpace(5, 0), MultiBinarySpace(2,2), MultiDiscreteSpace([2,2], 0))) == false
 end
 
 @testset "Space Dict" begin
@@ -70,22 +70,22 @@ end
                 "front_cam"=> (BoxSpace(0, 1, (10, 10, 3)),
                                BoxSpace(0, 1, (10, 10, 3))),
                 "rear_cam" => BoxSpace(0, 1, (10, 10, 3))),
-            "ext_controller" => MultiDiscreteSpace([5, 2, 2]),
+            "ext_controller" => MultiDiscreteSpace([5, 2, 2], 0),
             "inner_state" => Dict(
-                "charge" => DiscreteSpace(100),
+                "charge" => DiscreteSpace(100, 0),
                 "system_checks" => MultiBinarySpace(10),
                 "job_status" => Dict(
-                    "task" => DiscreteSpace(5),
+                    "task" => DiscreteSpace(5, 0),
                     "progress" => BoxSpace(0, 100))))) == true
 end
 
 @testset "gym space transformation" begin
     env = gym.make("CartPole-v0")
-    @test Env.gymspace2jlspace(env[:action_space]) == DiscreteSpace(2)
+    @test Env.gymspace2jlspace(env[:action_space]) == DiscreteSpace(2, 0)
     @test Env.gymspace2jlspace(env[:observation_space]) == BoxSpace(Array{Float32}([-4.8, -3.4028235e38, -0.41887903, -3.4028235e38]),
                                                                  Array{Float32}([4.8, 3.4028235e38, 0.41887903, 3.4028235e38]))
     env = gym.make("Blackjack-v0")
-    @test Env.gymspace2jlspace(env[:observation_space]) == (DiscreteSpace(32), DiscreteSpace(11), DiscreteSpace(2))
+    @test Env.gymspace2jlspace(env[:observation_space]) == (DiscreteSpace(32, 0), DiscreteSpace(11, 0), DiscreteSpace(2, 0))
 
 end
 end

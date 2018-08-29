@@ -1,8 +1,9 @@
 struct DiscreteSpace <: AbstractSpace
     n::Int
+    offset::Int
 end
 
-"To compat with Python, here we start with 0"
-sample(d::DiscreteSpace) = rand(0:d.n-1)
-occursin(x::Int, d::DiscreteSpace) = 0 ≤ x < d.n
-==(x::DiscreteSpace, y::DiscreteSpace) = x.n == y.n
+size(d::DiscreteSpace) = 1
+sample(d::DiscreteSpace) = rand(d.offset : d.n + d.offset - 1)
+occursin(x::Int, d::DiscreteSpace) = d.offset ≤ x < d.offset + d.n
+==(x::DiscreteSpace, y::DiscreteSpace) = x.n == y.n && x.offset == y.offset

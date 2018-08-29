@@ -1,11 +1,13 @@
 using MLStyle
 using ArcadeLearningEnvironment
+using .Space
 
 struct AtariEnv <: AbstractEnv
     ale::Ptr{Nothing}
     screen::Array{UInt8, 1}
     getscreen::Function
     actions::Vector{Int32}
+    actionspace::AbstractSpace
     noopmax::Int64
 end
 
@@ -22,13 +24,14 @@ function AtariEnv(id::String;
     setInt(ale, "frame_skip", Int32(frame_skip))
     setFloat(ale, "repeat_action_probability", Float32(repeat_action_probability))
     actions = actionset == :minimal ? getMinimalActionSet(ale) : getLegalActionSet(ale)
+    actionspace = DiscreteSpace(length(actions), 1)
     screen, get_screen = @match colorspace begin
         "Grayscale" => (Array{Cuchar}(undef, 210*160), getScreenGrayscale)
         "RGB"       => (Array{Cuchar}(undef, 3*210*160), getScreenRGB)
         "Raw"       => (Array{Cuchar}(undef, 210*160), getScreen)
         _           => throw("invalid colorspace $(env.colorspace)")
     end
-    AtariEnv(ale, screen, get_screen, actions, noopmax)
+    AtariEnv(ale, screen, get_screen, actions, actionspace, noopmax)
 end
 
 function receive(env::AtariEnv, method::String, args::Tuple, kw::Iterators.Pairs)
@@ -40,11 +43,12 @@ function receive(env::AtariEnv, method::String, args::Tuple, kw::Iterators.Pairs
                          env.getscreen(env.ale, env.screen)
                          env.screen
                        end
-        "interact"  => begin reward = act(env.ale, env.actions[args...])
+        "interact"  => begin reward = act(env.ale, env.actions[args[1]])  # assume length(args) == 1
                          env.getscreen(env.ale, env.screen)
-                         (env.screen, reward, game_over(env.ale))
+                         (observe=env.screen, reward=reward, isdone=game_over(env.ale))
                        end
-        "getstate"  => (env.getscreen(env.ale, env.screen); env.screen)
+        "getstate"  => (env.getscreen(env.ale, env.screen);
+                        (observe=env.screen, isdone=game_over(env.ale)))
         _       => nothing
     end
 end

@@ -1,10 +1,11 @@
+using .Space
 using ViZDoom
 const vz = ViZDoom
 
 struct ViZDoomEnv <: AbstractEnv
     game::vz.DoomGameAllocated
     actions::Vector{Vector{Float64}}
-    sleeptime::Float64
+    actionspace::DiscreteSpace
 end
 
 function ViZDoomEnv(::String; add_game_args = "", kw...)
@@ -21,15 +22,11 @@ function ViZDoomEnv(::String; add_game_args = "", kw...)
     end
     game = vz.basic_game(; config...)
     vz.add_game_args(game, add_game_args)
-    if config[:window_visible]
-        sleeptime = 1.0 / vz.DEFAULT_TICRATE
-    else
-        sleeptime = 0.
-    end
     na = haskey(config, :available_buttons) ? length(config[:available_buttons]) : 3
+    actions = [Float64[i == j for i in 1:na] for j in 1:na]
     env = ViZDoomEnv(game, 
-                     [Float64[i == j for i in 1:na] for j in 1:na],
-                     sleeptime)
+                     actions,
+                     DiscreteSpace(length(actions), 1))
     init!(env)
     env
 end
@@ -37,5 +34,11 @@ end
 
 function receive(env::ViZDoomEnv, method::String, args::Tuple, kw::Iterators.Pairs)
     @match method begin
+        "reset"    => (vz.new_episode(env.game); vz.get_screen_buffer(env.game))
+        "getstate" => (observe=vz.get_screen_buffer(env.game), isdone=vz.is_episode_finished(env.game))
+        "interact" => (observe=vz.get_screen_buffer(env.game),
+                       reward=vz.make_action(env.game, env.actions[args[1]]),  # assume length(args) == 1
+                       isdone=vz.is_episode_finished(env.game))
+        _          => nothing
     end
 end
