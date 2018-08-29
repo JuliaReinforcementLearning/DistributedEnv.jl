@@ -36,23 +36,36 @@ end
 
 function receive(env::AtariEnv, method::String, args::Tuple, kw::Iterators.Pairs)
     @match method begin
-        "reset"     => begin reset_game(env.ale)
-                         for _ in 1:rand(0 : env.noopmax)
-                            act(env.ale, Int32(0))
-                         end
-                         env.getscreen(env.ale, env.screen)
-                         env.screen
+        "reset"     => begin 
                        end
         "interact"  => begin reward = act(env.ale, env.actions[args[1]])  # assume length(args) == 1
                          env.getscreen(env.ale, env.screen)
                          (observe=env.screen, reward=reward, isdone=game_over(env.ale))
                        end
-        "getstate"  => (env.getscreen(env.ale, env.screen);
-                        (observe=env.screen, isdone=game_over(env.ale)))
+        "getstate"  => ()
         _       => nothing
     end
 end
 
+function getstate(env::AtariEnv)
+    env.getscreen(env.ale, env.screen)
+    (observe=env.screen, isdone=game_over(env.ale))
+end
+
+function reset!(env::AtariEnv)
+reset_game(env.ale)
+for _ in 1:rand(0 : env.noopmax)
+    act(env.ale, Int32(0))
+    end
+    env.getscreen(env.ale, env.screen)
+    env.screen
+end
+
+function interact!(env::AtariEnv, a)
+    reward = act(env.ale, env.actions[args[1]])
+    env.getscreen(env.ale, env.screen)
+    (observe=env.screen, reward=reward, isdone=game_over(env.ale))
+end
 
 const atari_ids = [replace(x, r"\.bin$" => "")
     for x in readdir(joinpath(dirname(pathof(ArcadeLearningEnvironment)), "..", "deps", "roms"))]

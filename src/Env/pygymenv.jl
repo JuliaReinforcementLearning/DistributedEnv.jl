@@ -20,15 +20,17 @@ function GymEnv(id::String)
            gymspace2jlspace(pyenv[:action_space]))
 end
 
-function receive(env::GymEnv, method::String, args::Tuple, kw::Iterators.Pairs)
-    @match method begin
-        "reset"     => (pycall!(env.state, env.pyenv[:reset], PyArray); env.state)
-        "interact"  => (pycall!(env.state, env.pyenv[:step], PyVector, args...);
-                        (observe=env.state[1], reward=env.state[2], isdone=env.state[3]))
-        "getstate"  => (observe=env.state[1], isdone=env.state[3])
-        _           => nothing
-    end
+function reset!(env::GymEnv)
+    pycall!(env.state, env.pyenv[:reset], PyArray)
+    env.state
 end
+
+function interact!(env::GymEnv, a)
+    pycall!(env.state, env.pyenv[:step], PyVector, a)
+    (observe=env.state[1], reward=env.state[2], isdone=env.state[3])
+end
+
+getstate(env::GymEnv) = (observe=env.state[1], isdone=env.state[3])
 
 function gymspace2jlspace(s::PyObject)
     @match s[:__class__][:__name__] begin

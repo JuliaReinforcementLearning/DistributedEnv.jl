@@ -31,14 +31,10 @@ function ViZDoomEnv(::String; add_game_args = "", kw...)
     env
 end
 
+reset!(env::ViZDoomEnv) = (vz.new_episode(env.game); vz.get_screen_buffer(env.game))
+getstate(env::ViZDoomEnv) = (observe=vz.get_screen_buffer(env.game), isdone=vz.is_episode_finished(env.game))
 
-function receive(env::ViZDoomEnv, method::String, args::Tuple, kw::Iterators.Pairs)
-    @match method begin
-        "reset"    => (vz.new_episode(env.game); vz.get_screen_buffer(env.game))
-        "getstate" => (observe=vz.get_screen_buffer(env.game), isdone=vz.is_episode_finished(env.game))
-        "interact" => (observe=vz.get_screen_buffer(env.game),
-                       reward=vz.make_action(env.game, env.actions[args[1]]),  # assume length(args) == 1
-                       isdone=vz.is_episode_finished(env.game))
-        _          => nothing
-    end
+function interact!(env::ViZDoomEnv, a)
+    reward=vz.make_action(env.game, env.actions[a])
+    (observe=vz.get_screen_buffer(env.game), reward=reward, isdone=vz.is_episode_finished(env.game))
 end
