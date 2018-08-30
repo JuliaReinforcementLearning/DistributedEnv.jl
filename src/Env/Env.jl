@@ -1,9 +1,10 @@
 __precompile__(false)
-module Env
+@reexport module Env
 export id2env, receive,
-       reset!, interact!, getstate,
-       GymEnv, AtariEnv, ViZDoomEnv, CartPole, MountainCar, Pendulum
+       reset!, interact!, getstate, actionspace,
+       AbstractEnv, GymEnv, AtariEnv, ViZDoomEnv, CartPole, MountainCar, Pendulum
 
+using Reexport
 include("Space/Space.jl")
 include("abstractenv.jl")
 include("pygymenv.jl")
@@ -26,11 +27,14 @@ end
 
 function receive(env::AbstractEnv, method::String, args::Tuple, kw::Iterators.Pairs)
     @match method begin
-        "reset"     => reset!(env)
-        "interact"  => interact!(env, args[1])
-        "getstate"  => getstate(env)
-        _           => nothing
+        "reset"       => reset!(env)
+        "interact"    => interact!(env, args[1])
+        "getstate"    => getstate(env)
+        "actionspace" => env.actionspace
+        _             => nothing
     end
 end
+
+actionspace(env::AbstractEnv) = env.actionspace
 
 end

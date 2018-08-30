@@ -1,4 +1,4 @@
-module Space
+@reexport module Space
 
 import Base:occursin, size, ==
 export AbstractSpace,
@@ -6,7 +6,6 @@ export AbstractSpace,
        DiscreteSpace,
        MultiBinarySpace,
        MultiDiscreteSpace,
-       gymspace2jlspace,
        sample
 
 include("abstractspace.jl")

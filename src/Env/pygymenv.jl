@@ -9,7 +9,7 @@ struct GymEnv <: AbstractEnv
     pyenv::PyObject
     state::PyObject
     observespace::AbstractSpace
-    actspace::AbstractSpace
+    actionspace::AbstractSpace
 end
 
 function GymEnv(id::String)

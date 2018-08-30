@@ -1,5 +1,6 @@
 using Distributed
-abstract type AbstractDistributedEnv end
+using .Env
+abstract type AbstractDistributedEnv <: AbstractEnv end
 
 "send a message to an environment"
 function send end

@@ -62,7 +62,7 @@ for _ in 1:rand(0 : env.noopmax)
 end
 
 function interact!(env::AtariEnv, a)
-    reward = act(env.ale, env.actions[args[1]])
+    reward = act(env.ale, env.actions[a])
     env.getscreen(env.ale, env.screen)
     (observe=env.screen, reward=reward, isdone=game_over(env.ale))
 end
